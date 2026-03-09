@@ -2,26 +2,32 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <title>翰林書院 · DSE 雲端同步系統</title>
+    <title>DSE 指定篇章修煉帖 · 翰林書院</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap');
         :root { --ink: #2c3e50; --paper: #f4ece0; --vermilion: #ae3e2e; --gold: #c6a052; }
         body { background-color: #d2c1a3; font-family: 'Noto Serif TC', serif; color: var(--ink); padding: 20px; display: flex; flex-direction: column; align-items: center; margin: 0; }
         
+        /* 卷軸主體 */
         .scroll-container { width: 100%; max-width: 850px; background: var(--paper); border: 15px solid #5d4037; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; margin-top: 20px; }
-        h1 { text-align: center; border-bottom: 2px solid var(--vermilion); padding-bottom: 15px; letter-spacing: 8px; margin-top: 0; }
+        h1 { text-align: center; border-bottom: 2px solid var(--vermilion); padding-bottom: 15px; letter-spacing: 8px; margin-top: 0; color: var(--ink); }
+        .sub-heading { text-align: center; font-size: 0.9rem; color: var(--vermilion); margin-top: -10px; margin-bottom: 20px; letter-spacing: 3px; font-weight: bold; }
         
+        /* 狀態與設定區 */
         .status-bar { background: #fff; padding: 10px; text-align: center; font-size: 0.9rem; margin-bottom: 20px; border: 1px solid var(--gold); }
         .setup-box { background: rgba(255,255,255,0.4); padding: 20px; border: 1px solid var(--gold); margin-bottom: 30px; display: none; }
         .label-title { font-weight: bold; color: var(--vermilion); margin: 15px 0 5px 0; display: block; }
         
+        /* 令牌與按鈕 */
         .token-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
-        .token { padding: 12px 5px; border: 1px solid var(--ink); background: #fff; text-align: center; cursor: pointer; font-weight: bold; }
+        .token { padding: 12px 5px; border: 1px solid var(--ink); background: #fff; text-align: center; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .token.active { background: var(--vermilion); color: white; border-color: var(--vermilion); }
         
         select, .btn-summon { width: 100%; padding: 15px; font-family: inherit; font-size: 1.1rem; border: 1px solid var(--ink); margin-top: 10px; cursor: pointer; }
-        .btn-summon { background: var(--ink); color: white; letter-spacing: 10px; margin-top: 20px; }
+        .btn-summon { background: var(--ink); color: white; letter-spacing: 10px; margin-top: 20px; font-weight: bold; }
+        .btn-summon:hover { background: #34495e; }
         
+        /* 題目卡片 */
         .q-card { border-bottom: 1px dashed var(--gold); padding: 25px 0; position: relative; min-height: 140px; }
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         .opt-btn { padding: 12px; border: 1px solid var(--ink); background: rgba(255,255,255,0.6); cursor: pointer; text-align: left; font-family: inherit; }
@@ -41,14 +47,15 @@
         .note-section { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.1); font-size: 0.95rem; color: #5d4037; font-style: italic; }
         .fill-input { border: none; border-bottom: 2px solid var(--vermilion); background: transparent; width: 260px; text-align: center; font-size: 1.1rem; outline: none; font-family: inherit; }
 
+        /* 頁尾導出區 */
         .mail-footer { width: 100%; max-width: 850px; background: #5d4037; color: #f4ece0; padding: 30px; text-align: center; border-radius: 0 0 10px 10px; display: none; margin-top: -5px; box-sizing: border-box; }
         .btn-gold { background: var(--gold); color: #fff; border: none; padding: 12px 35px; font-family: inherit; cursor: pointer; font-weight: bold; margin-top: 15px; letter-spacing: 2px; }
 
         /* 🖋️ 作者水印署名區 */
         .author-watermark { width: 100%; max-width: 850px; margin-top: 40px; padding-bottom: 60px; text-align: center; color: #5d4037; }
-        .author-watermark a { text-decoration: none; transition: 0.3s; }
+        .author-watermark a { text-decoration: none; color: #ae3e2e; font-weight: bold; border-bottom: 1px solid #ae3e2e; }
 
-        /* 📋 複製彈窗 */
+        /* 📋 彈窗設定 */
         #copy-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 500px; background: #fff; border: 5px solid var(--vermilion); padding: 20px; z-index: 100; box-shadow: 0 0 100px rgba(0,0,0,0.5); }
         .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index: 90; }
         #copy-text { width: 100%; height: 200px; margin-bottom: 15px; font-family: inherit; padding: 10px; border: 1px solid #ccc; }
@@ -57,11 +64,15 @@
 <body>
 
 <div class="scroll-container">
-    <h1>翰林書院 · 雲端同步</h1>
-    <div id="status" class="status-bar">載入中...</div>
+    <h1>DSE 指定篇章修煉帖</h1>
+    <div class="sub-heading">—— 翰林書院 · CMM 老師寄語 ——</div>
+    
+    <div id="status" class="status-bar">正在開啟卷軸，請稍候...</div>
+
     <div class="setup-box" id="setup-area">
         <span class="label-title">【 擇取篇章 】</span>
         <select id="lesson-sel" onchange="updatePoolInfo()"></select>
+        
         <span class="label-title">【 令牌模式 】</span>
         <div class="token-group">
             <div id="t-字詞" class="token" onclick="pickMode('字詞')">字詞</div>
@@ -69,10 +80,18 @@
             <div id="t-背默" class="token" onclick="pickMode('背默')">背默</div>
             <div id="t-答題" class="token" onclick="pickMode('答題')">答題</div>
         </div>
-        <select id="limit-sel"><option value="5">五題</option><option value="10">十題</option><option value="999">全卷</option></select>
+
+        <span class="label-title">【 考校題量 】</span>
+        <select id="limit-sel">
+            <option value="5">五題</option>
+            <option value="10">十題</option>
+            <option value="999">全卷</option>
+        </select>
         <div id="pool-info" style="font-size: 0.8rem; color: #7f8c8d; text-align: right; margin-top: 8px;"></div>
+        
         <button class="btn-summon" onclick="startTest()">啟 卷 考 校</button>
     </div>
+
     <div id="display-area"></div>
 </div>
 
@@ -93,7 +112,7 @@
     </div>
     <div style="margin-top: 15px; font-size: 0.8rem;">
         如有反饋建議，歡迎致信：
-        <a href="mailto:mschengmanman@gmail.com" style="color: #ae3e2e; font-weight: bold; border-bottom: 1px solid #ae3e2e;">mschengmanman@gmail.com</a>
+        <a href="mailto:mschengmanman@gmail.com">mschengmanman@gmail.com</a>
     </div>
 </div>
 
@@ -122,7 +141,7 @@
         });
         const sel = document.getElementById('lesson-sel');
         Object.keys(ALL_DATA).sort().forEach(n => { let o=document.createElement('option'); o.value=n; o.innerText="《"+n+"》"; sel.appendChild(o); });
-        document.getElementById('status').innerText = "✅ 卷宗就緒";
+        document.getElementById('status').innerText = "✅ 卷宗就緒，請擇題修煉";
         document.getElementById('setup-area').style.display = 'block';
     }
 
@@ -139,54 +158,67 @@
     }
 
     function startTest() {
-        if(!curMode) return alert("請選令牌");
+        if(!curMode) return alert("請選令牌模式");
         const l = document.getElementById('lesson-sel').value, limit = parseInt(document.getElementById('limit-sel').value);
         const area = document.getElementById('display-area'); area.innerHTML = "";
         currentTestList = ALL_DATA[l].filter(x=>x.type===curMode).sort(()=>Math.random()-0.5).slice(0,limit);
+        
         currentTestList.forEach((item, i) => {
             const card = document.createElement('div'); card.className = 'q-card';
             let html = `<div class="seal-square" id="seal-${i}"></div><div style="font-weight:bold;margin-bottom:10px;">【第 ${i+1} 題】 ${item.q}</div>`;
-            if(curMode === '背默') html += `<div>${item.q.replace('______', `<input type="text" class="fill-input" id="ipt-${i}">`)}</div><button onclick="reveal(${i}, false)">提交墨寶</button>`;
-            else if(curMode === '答題') html += `<textarea id="ipt-${i}" style="width:100%;height:80px;"></textarea><br><button onclick="reveal(${i}, true)">參閱典籍</button>`;
-            else {
+            
+            if(curMode === '背默') {
+                html += `<div>${item.q.replace('______', `<input type="text" class="fill-input" id="ipt-${i}">`)}</div><button onclick="reveal(${i}, false)" style="margin-top:10px;">提交墨寶</button>`;
+            } else if(curMode === '答題') {
+                html += `<textarea id="ipt-${i}" style="width:100%;height:80px;"></textarea><br><button onclick="reveal(${i}, true)" style="margin-top:10px;">參閱典籍</button>`;
+            } else {
                 let opts = [item.a, item.b, item.c, item.d].filter(o=>o&&o!=="").sort(()=>Math.random()-0.5);
                 html += `<div class="options-grid">${opts.map(o=>`<button class="opt-btn" onclick="revealOpt(this, ${i}, '${o}')">${o}</button>`).join('')}</div>`;
             }
+            
             html += `<div id="fb-${i}" class="feedback-box"></div>`;
-            card.innerHTML = html; area.appendChild(card);
+            card.innerHTML = html; 
+            area.appendChild(card);
         });
         document.getElementById('mail-area').style.display = 'block';
     }
 
     function reveal(i, isE) {
         const d = currentTestList[i], v = document.getElementById('ipt-'+i).value.trim();
-        document.getElementById('seal-'+i).style.display = "flex"; document.getElementById('fb-'+i).style.display = "block";
-        document.getElementById('seal-'+i).innerHTML = isE ? "閱" : (v===d.ans.trim() ? "正<br>確" : "不<br>足");
+        const seal = document.getElementById('seal-'+i);
+        seal.style.display = "flex"; 
+        document.getElementById('fb-'+i).style.display = "block";
+        seal.innerHTML = isE ? "閱" : (v===d.ans.trim() ? "正<br>確" : "不<br>足");
         document.getElementById('fb-'+i).innerHTML = `<span class="ans-header">【${isE?'參考':'正確'}答案】：</span>${d.ans}<div class="note-section">${d.note}</div>`;
     }
 
     function revealOpt(btn, i, p) {
         const d = currentTestList[i];
-        document.getElementById('seal-'+i).style.display = "flex"; document.getElementById('fb-'+i).style.display = "block";
-        const isC = p.trim()===d.ans.trim(); if(isC) btn.classList.add('right'); else btn.classList.add('wrong');
-        document.getElementById('seal-'+i).innerHTML = isC ? "正<br>確" : "不<br>足";
+        const seal = document.getElementById('seal-'+i);
+        seal.style.display = "flex"; 
+        document.getElementById('fb-'+i).style.display = "block";
+        const isC = p.trim()===d.ans.trim(); 
+        if(isC) btn.classList.add('right'); else btn.classList.add('wrong');
+        seal.innerHTML = isC ? "正<br>確" : "不<br>足";
         document.getElementById('fb-'+i).innerHTML = `<span class="ans-header">【正確解答】：</span>${d.ans}<div class="note-section">${d.note}</div>`;
         btn.parentElement.querySelectorAll('button').forEach(b=>b.disabled=true);
     }
 
     function handleExport() {
         const l = document.getElementById('lesson-sel').value;
-        let body = `《${l}》考校記錄：\n\n`;
-        currentTestList.forEach((item, i) => { body += `【${i+1}】${item.q.replace(/<[^>]*>/g,'')}\n答：${item.ans}\n評：${item.note}\n---\n`; });
+        let body = `《${l}》DSE 考校記錄：\n\n`;
+        currentTestList.forEach((item, i) => { 
+            body += `【${i+1}】${item.q.replace(/<[^>]*>/g,'')}\n答：${item.ans}\n評：${item.note}\n---\n`; 
+        });
         document.getElementById('copy-text').value = body;
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('copy-modal').style.display = 'block';
-        window.location.href = `mailto:?subject=修煉筆記&body=${encodeURIComponent(body)}`;
+        window.location.href = `mailto:?subject=DSE修煉筆記&body=${encodeURIComponent(body)}`;
     }
 
     function copyContent() {
         const t = document.getElementById('copy-text'); t.select(); document.execCommand('copy');
-        alert("墨寶已複製至剪貼簿。");
+        alert("墨寶已複製至剪貼簿，可貼至筆記中。");
     }
 
     function closeModal() {
